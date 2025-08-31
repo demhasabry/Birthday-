@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Happy Birthday Reem 🎉</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    h1 {
+      color: #fff;
+      text-shadow: 2px 2px 5px #ff4081;
+      margin-bottom: 20px;
+    }
+
+    #cake {
+      position: relative;
+      width: 240px;
+      height: 130px;
+      background: chocolate;
+      border-radius: 0 0 120px 120px;
+      overflow: hidden;
+    }
+
+    #cake::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 35px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .candle {
+      position: absolute;
+      width: 10px;
+      height: 40px;
+      background: white;
+      border-radius: 2px;
+    }
+
+    .flame {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 20px;
+      background: radial-gradient(circle, yellow, orange, red);
+      border-radius: 50%;
+      animation: flicker 0.3s infinite alternate;
+    }
+
+    @keyframes flicker {
+      from { transform: translateX(-50%) scale(1); opacity: 1; }
+      to { transform: translateX(-50%) scale(1.2); opacity: 0.8; }
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      background: #ff4081;
+      color: white;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #e91e63;
+    }
+
+    #note {
+      margin-top: 15px;
+      color: white;
+      font-size: 1.1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎂 Happy 22nd Birthday Reem 🎂</h1>
+  <div id="cake"></div>
+
+  <audio id="song" src="https://www2.cs.uic.edu/~i101/SoundFiles/HappyBirthday.mp3"></audio>
+  <button onclick="playMusic()">▶ Play Music</button>
+  <p id="note">Blow into your mic to blow out the candles 🎤💨</p>
+
+  <script>
+    const age = 22; // Reem's age
+
+    function addCandles() {
+      let cake = document.getElementById("cake");
+      cake.innerHTML = "";
+      let spacing = 180 / age;
+
+      for (let i = 0; i < age; i++) {
+        let candle = document.createElement("div");
+        candle.classList.add("candle");
+        candle.style.left = (20 + i * spacing) + "px";
+        candle.style.bottom = "30px";
+
+        let flame = document.createElement("div");
+        flame.classList.add("flame");
+        candle.appendChild(flame);
+
+        cake.appendChild(candle);
+      }
+    }
+    addCandles();
+
+    // Music must start with user gesture on iPhone
+    function playMusic() {
+      const song = document.getElementById("song");
+      song.play();
+      startMic(); // also request mic when she taps play
+    }
+
+    // Mic detection for blowing out candles
+    function startMic() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function(stream) {
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const analyser = audioContext.createAnalyser();
+          const microphone = audioContext.createMediaStreamSource(stream);
+          microphone.connect(analyser);
+          analyser.fftSize = 256;
+
+          const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+          function detectBlow() {
+            analyser.getByteFrequencyData(dataArray);
+            let volume = dataArray.reduce((a, b) => a + b) / dataArray.length;
+
+            if (volume > 65) { // iPhone mic is sensitive
+              document.querySelectorAll('.flame').forEach(f => f.style.display = "none");
+            }
+
+            requestAnimationFrame(detectBlow);
+          }
+          detectBlow();
+        })
+        .catch(function(err) {
+          console.log("Mic access denied:", err);
+        });
+    }
+  </script>
+</body>
+</html>
